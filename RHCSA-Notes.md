@@ -1,6 +1,20 @@
 - Networking
-    + nmcli
+    + hostname
+        > vi /etc/hostname | systemctl restart systemd-hostnamed
+        > hostnamectl set-hostname
     + manual
+        > cd /etc/sysconfig/network-scripts | cp ifcfg
+        > BOOTPROTO=static | IPV6INIT=no | ONBOOT=yes | IPADDR=x.x.x.x | PREFIX=24 | GATEWAY=x.x.x.1
+        > ifdown / ifup
+        > ip a
+    + nmcli
+        > nmcli dev status
+        > nmcli con add type Ethernet ifname enp0s con-name enp0s ip4 x.x.x.x/y gw4 x.x.x.1
+        > nmcli con show / nmcli con down / nmcli con up
+        > ip a
+    + hosts table
+        > vi /etc/hosts
+        > x.x.x.x server20.example.com server20
 - Mounting Examples
     + FS
         > /dev/vgfs/ext4vol /dir ext4 defaults 0 0
@@ -129,6 +143,10 @@
     + Tuning Profile
         > tuned-adm profile | recommend | {type} | off
     + Chrony
+        > yum install chrony
+        > vi /etc/chrony.conf
+        > systemctl enable chronyd.service
+        > chronyc
     + Find
         > exec - "-exec ls -ld {} \;"
     + Grep
