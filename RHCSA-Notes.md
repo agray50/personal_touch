@@ -31,7 +31,7 @@
     + Swap
         > UUID="xxxxxxxx" swap swap pri=1 0 0
 - Repo Example
-    + name= / baseurl=file:///mnt/BaseOS / gpgcheck=0 | yum repolist
+    + name= / baseurl=file:///mnt/BaseOS / gpgcheck=0 / enabled=1| yum repolist
 - File Systems
     + lsblk | df -hT | /etc/fstab mount -a |
         > MBR FS UUID - lsblk -f
@@ -91,66 +91,138 @@
         > mkswap -L sdd3 /dev/sdd1 40 #Partition
         > vgcreate vgfs /dev/sdd1 | lvcreate vgfs --name swapvol -L 132
         > mkswap /dev/vgfs/swapvol
+        > swapon -a
 - User/Group
     + User
         > Passwd - "cd /etc ; grep user1: passwd shadow group gshadow"
+        > chage #account expiry
+        > useradd -s /sbin/nologin #non-interactive shell
+        > usermod -L #lockaccount
     + Group
     + Permissions
+        > chgrp / chmod / chown
     + Advanced
         > Setuid - u+s #Executed by non owners with owner permissions
         > Setgid - g+s #Inherit Group Owner
         > Sticky Bits - o+t #Protects a files and subdirectories from being deleted or moved
 - ACLs
-    + setfacl - "-m u:user100:rw filename" "-x u:user100 filename" "-b filename {Remove All}"
-    + getfacl - "-c"
-    + defaultacl - "setfacl -dm u:user100:rw, u:user200:rw /dir" #For consistent dir perms
+    + setfacl
+        > setfacl -m u:user100:rw filename" "-x u:user100 filename" "-b filename {Remove All}"
+    + getfacl
+        > getfacl -c
+    + defaultacl
+        > setfacl -dm u:user100:rw, u:user200:rw /dir" #For consistent dir perms
 - Boot
     + Reset Root Password
         > #add rd.break after "rhgb quiet"
         > mount -o remount, rw /sysroot | chroot /sysroot | passwd | touch /.autorelabel
+    + Grub
+        > vi /etc/default/grub
+        > grub2-mkconfig -o /boot/grub2/grub.cfg
+        > remove rhgb quiet for boot messages
 - YUM
     + Individual
-        > config-manager
-        > list
-        > info
+        > yum config-manager
+        > yum list
+        > yum info
     + Groups
-        > group list
-        > group info
+        > yum group list
+        > yum group info
     + Modules
-        > module list
-        > module info
-        > module reset perl
-        > install perl:5.26/minimal --allowerasing
+        > yum module list
+        > yum module info
+        > yum module reset perl
+        > yum module install perl:5.26/minimal --allowerasing
 - Firewalld
+    + firewall-cmd
+        > firewall-cmd --add-service=http --permanent
+        > firewall-cmd --add-port=80/tcp --permanent
+        > firewall-cmd --zone=internal --add-port=5901-5910/tcp --permanent
+        > firewall-cmd --reload
+        > firewall-cmd --list-services / --list-ports
+        > cat /etc/firewalld/zones/public.xml / cat /etc/firewalld/zones/internal.xml
+        > firewall-cmd --get-active-zones
+        > firewall-cmd --set-default-zone=internal
+        > firewall-cmd --remove-service=ssh --permanent
 - SELinux
-    + semanage | fcontext / port
-    + setsebool / getsebool
+    + ll -Z | restorecon -R /tmp/dir
     + chcon
+        > chcon -u user_u -t public_content_t -R /dir
+    + semanage
+        > semanage fcontext -a -t public_content_t -s user_u '/tmp/dir(/.*)?'
+        > semanage port -a -t http_port_t -p tcp 8010 | semanage port -d -t http_port_t -p tcp 8010
+        > semanage port -l
+        > cp file.txt --preserve=context
+    + setsebool / getsebool
+        > getsebool nfs_export_all_rw
+        > setsebool nfs_export_all_rw_off -P #Persistent
+    + setenforce
+        > setenforce permissive | vi /etc/selinux/config
 - Bash
     + Integers
         > eq | equal, ne | not equal, gt | greater than, ge | greater than or eq, lt | less than, le | less than or eq
     + Strings
         > = | equal, != | not equal, \< | less than, \> | greater than
+    + For Loop
+        > for | do | done
+    + While Loop
+        > while | do | done
+    + IF Loop
+        > if | elif | then | else | fi
 - Podman
 - SSH
-    + 
+    + ssh
+        > ssh user1@server20
+        > ssh-keygen
+        > ssh-copy-id
 - Misc
     + Tar
+        > tar -cvf / tar -xvf /tmp/etc.tar /etc/sysconfig
+    + Logger
+        > logger "This is the RHCSA sample exam on $(date) by $LOGNAME"
+        > grep "This is the" /var/log/messages
     + Environment Variables
+        > printenv
+        > $PS1
     + Jobs
-        > At - at 11:30pm 03/31/2021 | atrm 1 | at -c 1
-        > Cron - crontab | */5 10,11 5,20 ** echo "Hello World" #/etc/cron.allow/deny for permissions
+        > at 11:30pm 03/31/2021 | atrm 1 | at -c 1
+        > crontab | */5 10,11 5,20 ** echo "Hello World" #/etc/cron.allow/deny for permissions
+        > crontab -u user70 -e #Set Cron for a user
     + Tuning Profile
-        > tuned-adm profile | recommend | {type} | off
+        > tuned-adm profile | recommended | {type} | off
+    + Boot Target
+        > systemctl set-default multi-user.target
     + Chrony
         > yum install chrony
         > vi /etc/chrony.conf
         > systemctl enable chronyd.service
         > chronyc
+    + Timedatectl
+        > timedatectl set-timezone / timedatectl set-ntp / timedatectl status
     + Find
         > exec - "-exec ls -ld {} \;"
+        > find / -mtime -30 >> /var/tmp/modfiles.txt
     + Grep
+        > grep '^essential' /usr/share > /tmp/pattern.txt
     + Links
+        > ln file1.txt file2.txt #hardlink
+        > ln -s /dir/file1.txt file2.txt #softlink
+    + Set Permanent Variables
+        > ~/.bashrc #Variables stored here reside in the user's home directory
+        > /etc/profile #Accesable by all users and are loaded whenever a new shell is opened
+        > /etc/environment #Accesable system-wide
+    + Add Secondary IP Addres statically
+        > nmcli con edit System\ eth0
+        > goto ipv4.addresses
+        > add x.x.x.x/y
+        > goto ipv6.addresses
+        > add xxxx::xxx/y
+        > back
+        > save
+        > nmcli con reload
+    + Enable packet forwarding
+        > vi /etc/sysctl.conf
+        > net.ipv4.port_forward=1
     + Automount User Home Directory Using Indirect Map
         > #Server
         > useradd -u 3000 user30
@@ -165,3 +237,5 @@
         > echo "* -rw &:/home&" >> /etc/auto.master.d./auto.home
         > systemctl enable autofs.service
         > sudo su - user30
+    + Basic Web Server
+        > vi /var/www/html/index.html
