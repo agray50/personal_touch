@@ -170,6 +170,28 @@
     + IF Loop
         > if | elif | then | else | fi
 - Podman
+    + Setup
+        > yum module install container-tools
+        > /etc/containers/registries.conf
+    + Commands
+        > podman search
+        > podman inspect
+        > podman rmi #remove image
+        > podman login
+        > podman port
+        > -e SECRET="xxxx"
+        > #Root User for Root Containers and Normal User for Rootless Containers
+        > chmod 777 /dir | -v /dir:/container_data:Z
+        > -p hostport:containerport
+    + Systemd (Root Container)
+        > podman generate systemd --new --name root-container | sudo tee /etc/systemd/system/root-container.service
+        > systemctl daemon-reload
+        > systemctl enable --now root-container
+    + Systemd (Rootless Container)
+        > mkdir ~/.config/systemd/user -p
+        > podman generate systemd --new --name rootless-container > ~/.config/systemd/user/rootless-container.service
+        > systemctl --user daemon-reload
+        > systemctl enable --user --now rootless-container
 - SSH
     + ssh
         > ssh user1@server20
