@@ -4,12 +4,12 @@
         > hostnamectl set-hostname
     + manual
         > cd /etc/sysconfig/network-scripts | cp ifcfg
-        > BOOTPROTO=static | IPV6INIT=no | ONBOOT=yes | IPADDR=x.x.x.x | PREFIX=24 | GATEWAY=x.x.x.1 | DNS=
+        > BOOTPROTO=static | IPV6INIT=no | ONBOOT=yes | IPADDR=x.x.x.x | PREFIX=24 | GATEWAY=x.x.x.1 | DNS=x.x.x.x
         > ifdown / ifup
         > ip a
     + nmcli
         > nmcli dev status
-        > nmcli con add type Ethernet ifname enp0s con-name enp0s ip4 x.x.x.x/y gw4 x.x.x.1
+        > nmcli con add type Ethernet ifname enp0s con-name enp0s ip4 x.x.x.x/y gw4 x.x.x.x ipv4.dns x.x.x.x
         > nmcli con show / nmcli con down / nmcli con up
         > ip a
     + hosts table
@@ -212,9 +212,22 @@
         > ssh-copy-id
     + scp
         > sudo scp /dir1 server1:/dir2
+    + rsync
+        > rsync -avPz /etc/rsyslog.conf server20:/tmp
 - Misc
     + Tar
         > tar -cvf / tar -xvf /tmp/etc.tar /etc/sysconfig
+    + rpm
+        > rpm -ql list files
+        > rpm -qa list packages
+    + kernel
+        > uname -r
+        > access.redhat.com | Downloads | Red Hat Enterprise Linux 8 by Category | Click Packages and Enter Kernel
+        > Download latest for kernel packages
+        > yum install /tmp/kernel*
+    + journald
+        > mkdir /var/log/journal
+        > systemctl restart systemd-journald
     + Logger
         > logger "This is the RHCSA sample exam on $(date) by $LOGNAME"
         > grep "This is the" /var/log/messages
@@ -237,7 +250,7 @@
     + Timedatectl
         > timedatectl set-timezone / timedatectl set-ntp / timedatectl status
     + Find
-        > exec - "-exec ls -ld {} \;"
+        > -exec ls -ld {} \;
         > find / -mtime -30 >> /var/tmp/modfiles.txt
     + Grep
         > grep '^essential' /usr/share > /tmp/pattern.txt
@@ -248,15 +261,6 @@
         > ~/.bashrc #Variables stored here reside in the user's home directory
         > /etc/profile #Accesable by all users and are loaded whenever a new shell is opened
         > /etc/environment #Accesable system-wide
-    + Add Secondary IP Addres statically
-        > nmcli con edit System\ eth0
-        > goto ipv4.addresses
-        > add x.x.x.x/y
-        > goto ipv6.addresses
-        > add xxxx::xxx/y
-        > back
-        > save
-        > nmcli con reload
     + Enable packet forwarding
         > vi /etc/sysctl.conf
         > net.ipv4.port_forward=1
