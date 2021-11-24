@@ -4,7 +4,7 @@
         > hostnamectl set-hostname
     + manual
         > cd /etc/sysconfig/network-scripts | cp ifcfg
-        > BOOTPROTO=static | IPV6INIT=no | ONBOOT=yes | IPADDR=x.x.x.x | PREFIX=24 | GATEWAY=x.x.x.1
+        > BOOTPROTO=static | IPV6INIT=no | ONBOOT=yes | IPADDR=x.x.x.x | PREFIX=24 | GATEWAY=x.x.x.1 | DNS=
         > ifdown / ifup
         > ip a
     + nmcli
@@ -15,6 +15,8 @@
     + hosts table
         > vi /etc/hosts
         > x.x.x.x server20.example.com server20
+    + PS1
+        > \H full hostname 
 - Mounting Examples
     + FS
         > /dev/vgfs/ext4vol /dir ext4 defaults 0 0
@@ -23,7 +25,7 @@
     + UUID
         > UUID="xxxxxxxx" /dir ext4 defaults 0 0
     + Local Disk
-        > /dev/sr0 /mnt iso9660 r0 0 0
+        > /dev/sr0 /mnt iso9660 ro 0 0
     + Stratis
         > UUID="xxxxxxxx" /dir xfs x-systemd.requires=stratisd.service 0 0
     + NFS
@@ -71,8 +73,15 @@
         > echo "/autodir {ServerIP}:/dir" >> /etc/auto.master.d/auto.dir
         > systemctl restart autofs
         > #Indirect Map
-        > echo "autoindir {ServerIP}:/dir" >> /etc/auto.misc
+        > echo "dir {ServerIP}:/dir" >> /etc/auto.misc
         > systemctl restart autofs
+        > #Mount Directory
+        > Make user on server and set password
+        > /home /server(rw) | exportfs -av
+        > Make user on client and set base home dir (-b) and no home dir (-M)
+        > mkdir /dir1
+        > vi /etc/auto.master | /dir1 /etc/auto.master.d/auto/home
+        > * -rw server:/home/&
     + LV / VG
         > parted /dev/sdd mklabel msdos | mkpart | set 1 lvm on
         > pvcreate /dev/sdd1 /dev/sdb
@@ -86,6 +95,7 @@
     + FS
         > mkfs.xfs | mkfs.ext4
         > lvresize -r -L +40 /dev/vgfs/xfsvol
+        > xfs_growfs
     + Swap
         > parted /dev/sdd mklabel msdos | mkpart
         > mkswap -L sdd3 /dev/sdd1 40 #Partition
@@ -115,11 +125,14 @@
 - Boot
     + Reset Root Password
         > #add rd.break after "rhgb quiet"
-        > mount -o remount, rw /sysroot | chroot /sysroot | passwd | touch /.autorelabel
+        > chroot /sysroot | mount -o remount,rw / | passwd | touch .autorelabel
+        > exit | reboot
     + Grub
         > vi /etc/default/grub
         > grub2-mkconfig -o /boot/grub2/grub.cfg
         > remove rhgb quiet for boot messages
+    + Systemctl
+        > systemctl isolate graphical
 - YUM
     + Individual
         > yum config-manager
@@ -197,6 +210,8 @@
         > ssh user1@server20
         > ssh-keygen
         > ssh-copy-id
+    + scp
+        > sudo scp /dir1 server1:/dir2
 - Misc
     + Tar
         > tar -cvf / tar -xvf /tmp/etc.tar /etc/sysconfig
