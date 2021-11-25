@@ -236,7 +236,7 @@
         > $PS1
     + Jobs
         > at 11:30pm 03/31/2021 | atrm 1 | at -c 1
-        > crontab | */5 10,11 5,20 ** echo "Hello World" #/etc/cron.allow/deny for permissions
+        > crontab | seconds minutes hours dayofthemonth month dayoftheweek
         > crontab -u user70 -e #Set Cron for a user
     + Tuning Profile
         > tuned-adm profile | recommended | {type} | off
